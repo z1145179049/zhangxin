@@ -1,0 +1,55 @@
+<html>
+<head></head>
+<body>
+    <table id="tab1"></table>
+
+</body>
+<script>
+function getRandomInt(min,max){
+    return Math.floor(Math.random()*(max-min))+min;
+}
+
+function getArray(n){
+    let arr=[];
+    for(let i=0;i<n;i++){
+        arr.push(getRandomInt(1,n*n));
+    }
+    return arr;
+}
+
+function getResultArray(a){
+    let n=Math.sqrt(a.length);
+    a.sort(function(a1,b1){
+        return a1-b1;
+    });
+    let bArr=[];
+    for(let i=0;i<n;i++){
+        for(let j=0;j<n;j++){
+            if(i%2==0){
+                bArr[i*n+j]=a[(n-1-i)*n+n-1-j];
+            }else{
+                bArr[i*n+j]=a[(n-1-i)*n+j];
+            }
+        }
+    }
+    return bArr;
+}
+
+window.onload=function(){
+    let a=getArray(16);
+    let bArr=getResultArray(a);
+    
+    let table=document.getElementById("tab1");
+    let len=Math.sqrt(bArr.length);
+    for(let i=0;i<len;i++){
+        let tr=document.createElement("tr");
+        table.append(tr);
+        for(let j=0;j<len;j++){
+            let td=document.createElement("td");
+            tr.append(td);
+            td.innerHTML=bArr[i*len+j];
+        }
+    }
+}
+</script>
+</html>

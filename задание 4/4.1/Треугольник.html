@@ -1,0 +1,26 @@
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Треугольник площадь</title>
+</head>
+<body>
+высота：<input type="text" value="" id="height"><br>
+ширина：<input type="text" value="" id="width"><br>
+   <input type="button" value="равно" id="ok">
+<div id="result"></div>
+<script type="text/javascript">
+var ok=document.getElementById("ok");
+ok.onclick=function(){
+var h=document.getElementById("height").value;
+   var w=document.getElementById("width").value;
+var s=h*w/2;
+   var obj=document.getElementById("result");
+   obj.innerHTML=("Треугольник площадь"+s);
+}
+
+</script>
+
+
+</body>
+</html>

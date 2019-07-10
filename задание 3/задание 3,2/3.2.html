@@ -1,0 +1,39 @@
+<svg>
+  <style>
+    #line {stroke:gray; stroke-width:3px; fill:none;}
+	.b1{
+		border: 1px solid red;
+	}
+  </style>
+  <symbol id="line">
+    <path d="M5 70 C 30 0, 60 0, 80 40 S 130 80, 155 10"/>
+  </symbol>
+  <g>
+    <use xlink:href="#line"/>
+    <use xlink:href="#line" y="15"/>
+	<use xlink:href="#line" y="30"/>
+    <use xlink:href="#line" y="50"/>
+  </g>  
+</svg>
+<svg>
+  <style>
+    #north {fill:#cc3300;}
+    #south {fill:#003399;}
+    #circle {stroke:gray; stroke-width:4px; fill:none;}
+  </style>
+  <g>
+    <path id="north" d="M40 10, 50 40, 30 40z"/>
+    <path id="south" d="M30 40, 50 40, 40 70z"/>
+    <circle id="circle" cx="40" cy="40" r="35"/>
+  </g>
+</svg>  
+</div>
+<svg class="b1">
+  <style>
+    #circle {stroke:gray; stroke-width:4px; fill:none;}
+  </style>
+  <g>
+    <circle id="circle" cx="40" cy="40" r="35"/>
+  </g>
+</svg>  
+</div>

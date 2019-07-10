@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+            <meta charset="utf-8">
+            <script src="jquery-3.4.1.js"></script>
+            <script src="2-1.js"></script>
+            <script src="2-2.js"></script>
+            <script src="2-3.js"></script>
+    </head>
+    <body>
+        <script>
+            let obj=[{
+                'text':'动物 ',
+                'child':[
+                    {
+                        'text':'哺乳动物',
+                        'child':[
+                            '奶牛',
+                            '驴子',
+                            '狗',
+                            '老虎队'
+                        ]
+                    },{
+                        'text':'其他',
+                        'child':[
+                            'Snakes',
+                            '鸟类',
+                            '蜥蜴'
+                        ]
+                    }
+                ]
+            },{
+                'text':'鱼',
+                'child':[
+                    {
+                        'text':'水族馆',
+                        'child':[
+                            'Guppy',
+                            '神仙鱼'
+                        ]
+                    },{
+                        'text':'海洋',
+                        'child':['海鳟']
+                    }
+                ]
+            }];
+        //1
+        //    fillData(obj);
+
+
+
+        //2    
+        //    showNode(document.documentElement);
+
+
+
+        //3
+        $(function(){
+            createNodeByJQ(obj);
+        });
+        </script>
+    </body>
+</html>

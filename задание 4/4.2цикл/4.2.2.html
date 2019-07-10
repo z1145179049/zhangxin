@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+
+<title></title>
+
+</head>
+
+
+
+<script type="text/javascript">
+
+var n = prompt("请输入数字n")
+var num1 = 1;
+
+var num2 = 1;
+
+for(var i = 3; i <= n; i++) {
+
+var temp = num2;
+
+num2 = num1 + num2;
+
+num1 = temp;
+
+}
+
+alert(2*num2+num1-1);
+
+</script>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>Matrix M</title>
+      
+   </head>
+   <body>
+      <p align="center">
+         <font size="4">
+            <script type="text/javascript">
+               var average, sum, count;
+               var R = [];
+               var M = [[5,3,10,4,9,40,-3,6],[12,-5,14,30,4,5,-4,10],[3,60,-4,5,7,2,10,40],[5,3,10,4,9,40,-3,6],[12,-5,14,30,4,5,-4,10],[3,60,-4,5,7,2,10,40]];
+               for (var i = M.length - 1; i >= 0; i--) {
+                  sum = 0;
+                  for (var j = M[i].length - 1; j >= 0; j--) {
+                     document.write(M[i][j]);
+                     if(j!=0)
+                        document.write(", ");
+                     sum += M[i][j];
+                  }
+                  document.write("<br>");
+                  average = sum / M[i].length;
+                  document.write("Среднее арифметическое：" + average);
+                  count = 0;
+                  for (var j = M[i].length - 1; j >= 0; j--) {
+                     if(M[i][j] > average){
+                        count++;
+                     }
+                  }
+                  document.write("<br>Более чем Среднее арифметическое количество：" + count + "<br><br>");
+                  R += count;
+               }
+               document.write("Построить массив R: ");
+               for (var i = 0; i < R.length; i++) {
+                  document.write(R[i]);
+                  if(i != R.length-1)
+                     document.write(", ");
+                } 
+            </script>
+
+         </font>
+      </p>
+   </body>
+</html>

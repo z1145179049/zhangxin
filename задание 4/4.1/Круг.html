@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    Радиус круга：<input type="text" id="inp">
+    <input type="button" value="равно" onclick="test()"> 
+</body>
+</html>
+<script>
+    function test(){
+        var inp = parseFloat(document.getElementById('inp').value);
+        var s = 3.14 * (inp * inp);
+        alert('плошадь：' + s);
+
+    }
+</script>

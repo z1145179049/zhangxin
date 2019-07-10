@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/lib/bootstrap.min.css">
+  <script src="/lib/jquery-1.12.2.min.js"></script>
+  <script src="/lib/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h3>
+99/5000
+工具提示示例</h3>
+  <p>data-placement属性指定工具提示位置。</p>
+  <ul class="list-inline">
+    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Hooray!">顶部</a></li>
+    <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Hooray!">底部</a></li>
+    <li><a href="#" data-toggle="tooltip" data-placement="left" title="Hooray!">左边</a></li>
+    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Hooray!">右边</a></li>
+  </ul>
+</div>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+});
+</script>
+
+</body>
+</html>

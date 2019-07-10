@@ -1,0 +1,26 @@
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Квадрат площадь</title>
+</head>
+<body>
+высокая：<input type="text" value="" id="height"><br>
+ширина：<input type="text" value="" id="width"><br>
+   <input type="button" value="равно" id="ok">
+<div id="result"></div>
+<script type="text/javascript">
+var ok=document.getElementById("ok");
+ok.onclick=function(){
+var h=document.getElementById("height").value;
+   var w=document.getElementById("width").value;
+var s=h*w;
+   var obj=document.getElementById("result");
+   obj.innerHTML=("Квадрат площадь"+s);
+}
+
+</script>
+
+
+</body>
+</html>

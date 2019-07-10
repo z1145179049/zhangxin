@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+
+<title></title>
+
+</head>
+
+<body>
+
+<p id="res"></p>
+
+<p>фибоначчи суммы</p>
+
+<script type="text/javascript">
+let res = document.getElementById('res');
+
+let a = [];
+a[0] = 1;
+a[1] = 1;
+
+for(let i=2; i < 15; i++) {
+	a[i] = a[i-1] + a[i-2];
+}
+let res_str = '斐波那契数列：' + a.join(', ');
+res.innerHTML = res_str;
+
+
+</script>
+</body>
+
+</html>
