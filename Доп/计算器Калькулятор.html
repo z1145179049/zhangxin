@@ -1,0 +1,227 @@
+<html>
+  <head>
+    <title>jisuanqi.html</title>
+
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link href="jisuanqi.css" type="text/css" rel="stylesheet"></link>
+<style>
+#text1{
+
+border-radius:10px;
+width:413px; 
+text-align:center;
+margin:0 auto; 
+height:300px; 
+padding:50px 50px;
+}
+
+#text1 .txt input{
+width: 440px;
+height: 50px;
+font-size:25px;
+border-radius:6px;
+margin-left: 16px;
+
+}
+.box{
+font-size: 25px;
+/*border: 2px solid blue;*/
+width: 380px;
+height: 200px;
+display: block;
+margin-left: 20px;
+margin-top: 31px;
+
+}
+.box input{
+border: 1px solid darkgreen;
+font-size: 23px;
+border-radius: 6px;
+}
+input[type="button"]{
+	width: 50px;
+	height: 50px; /*设置input按键的宽高*/
+	margin-right: 5px;
+	margin-top: 5px; 
+	font-size: 18px;
+}
+.box .tx_1{
+float:left; 
+width:99px;
+height: 49px;
+border: 1px solid darkgreen;
+font-size: 28px;
+border-radius: 6px;
+margin-left:0px;
+} 
+.box .tx_2{
+float:right; 
+margin-right:38px;
+width:49px;
+height: 98px;
+border: 1px solid darkgreen;
+font-size: 28px;
+border-radius: 6px;
+} 
+/*.box .fuhao{
+width: 49px;
+height: 50px;
+}
+.box .stlw{
+float: left;
+width: 81px;
+height: 50px;
+}*/
+.box from{
+border:1px solid darkgray;
+float:left;
+font-size:20px;
+width:194px;
+height:45px;
+}
+#time{
+font-size:33px;
+text-align:center;
+}
+</style>
+    <script>
+ var str='';
+ var str1='';
+ var frist='';
+ var second='';
+ var f='';
+ var result='';
+function getnum(num){
+   str+=num;
+       document.getElementsByTagName('input')[0].value=str; 
+       }
+   function fhkey(x){
+
+       frist=document.getElementsByTagName('input')[0].value;
+str1 = str + x;
+str='';
+   f=x;
+       document.getElementsByTagName('input')[0].value=f;  
+        }
+function eq(){
+second=document.getElementsByTagName('input')[0].value;
+        document.getElementsByTagName('input')[0].value=str1+second;
+/*  alert(document.getElementsByTagName('input')[0].value); */
+switch(f){
+case '+':frist=eval(frist)+eval(second);break;
+case '-':frist=eval(frist)-eval(second);break;
+case '*':frist=eval(frist)*eval(second);break;
+case '/':frist=eval(frist)/eval(second);break;
+case 'tan' :frist=Math.tan(eval(frist));break;
+case 'cos' :frist=Math.cos(eval(frist));break;
+case 'sin' :frist=Math.sin(eval(frist));break;
+}
+document.getElementsByTagName('input')[0].value=frist;
+}
+  function ql(){
+       str='';
+   frist='';
+   second='';
+   f='';
+   result='';
+   document.getElementsByTagName("input")[0].value='';
+  }
+   function sqr(){
+  if(str >= 0){
+  result=Math.sqrt(parseFloat(str)); 
+  document.getElementsByTagName('input')[0].value=result;  
+   }
+  else
+  alert("Error!! 负数 不能开方！");
+}
+function qufu(){
+  str = parseFloat(-str);
+  document.getElementsByTagName('input')[0].value=str;  
+}
+ 
+function qiudao(){
+  if(str!= "0")
+  result=1/parseFloat(str);
+  else 
+  alert("Error!! 0不能作为除数！");
+  document.getElementsByTagName('input')[0].value=result;   
+} 
+function pingfang(){
+result=str*str;
+document.getElementsByTagName('input')[0].value=result;
+}
+function lifang(){
+result=str*str*str;
+document.getElementsByTagName('input')[0].value=result;
+}
+
+</script>  
+  </head>
+  
+  <body background="img/beijing.png">
+   <p style="text-align:center;">网页计算器，perfect 完美</p>
+<hr/>
+<br/>
+<div>
+<div id="time"></div>
+<div id="text1" name="f"  >
+<a class="txt"><input name="jg"  value="0" ></a>
+<div class="box">
+
+
+<input type="button" value="AC" onclick="ql()" class="num">
+<input type="button" value=" C " onclick="ql()" class="num">
+<input type="button" value="CE" onclick="ql()" class="num">
+<input type="button" value="sin" onclick="fhkey('sin')" class="num">
+<input type="button" value="cos" onclick="fhkey('cos')" class="num">
+<input type="button" value="tan" onclick="fhkey('tan')" class="num"><br>
+
+
+<input type="button" name="sqrt" value="sqrt" onclick="sqr()" class="num">
+<input type="button" value="In" onclick="getnum(In)" class="num">
+<input type="button" value="int" onclick="fhkey('int')" class="num">
+<input type="button" value=" 7 " onclick="getnum(7)" class="num">
+<input type="button" value=" 8 " onclick="getnum(8)" class="num">
+<input type="button" value=" 9 " onclick="getnum(9)" class="num"><br>
+
+
+<input type="button" value="+" onclick="fhkey('+')" class="num">
+<input type="button" value=" - " onclick="fhkey('-')" class="num">
+<input type="button" value=" * " onclick="fhkey('*')" class="num">
+<input type="button" value=" 4 " onclick="getnum(4)" class="num">
+<input type="button" value=" 5 " onclick="getnum(5)" class="num">
+<input type="button" value=" 6 " onclick="getnum(6)" class="num"><br>
+
+<input type="button" value="  /  " onclick="fhkey('/')" class="num">
+<input type="button" value=" x² " onclick="pingfang()" class="num">
+<input type="button" value=" x³ " onclick="lifang()" class="num">
+<input type="button" value=" 1 " onclick="getnum(1)" class="num">
+<input type="button" value=" 2 " onclick="getnum(2)" class="num">
+<input type="button" value=" 3 " onclick="getnum(3)" class="num"><br>
+
+
+<input type="button" value="  （  " onclick="fhkey('（')" class="num">
+<input type="button" value="  ）  " onclick="fhkey(')')" class="num">
+<input type="button" value="1/x" onclick="qiudao()" class="num">
+<input type="button" value="." onclick="getnum('.')" class="num">
+<input type="button" value="0" onclick="getnum(0)" class="">
+<input type="button" onclick="eq()" value="=" class="tx_2"> 
+
+</div>
+</div>
+ 
+ 
+</div>
+
+
+
+
+
+  </body>
+
+  
+  
+  
+</html>
