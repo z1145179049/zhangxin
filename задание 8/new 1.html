@@ -1,0 +1,709 @@
+    
+<html>
+<head>
+	<title>Canvas & Mootools</title>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mootools/1.6.0/mootools-core.js"></script>
+	<script type="text/javascript">
+		var canvas, ctx, idUpdate, idBulletsMove, bullets, enemies, score, diffScoreMod, lives, gamerName, diffMod, cooldown, bigEnemyDelay, enemyCounter;
+		var cooldownReduction;
+		var airEnemyImg = new Image();
+		airEnemyImg.src = "coin.png";
+		var landEnemyImg = new Image();
+		landEnemyImg.src = "dollar.png";
+		var gameInProgress = false;
+		//сила гравитации
+		var G = 1;
+		var players = [["AAA", 41], ["BBB", 34],["CCC", 23],["DDD", 3],["FFF", 1]];
+		function getRandomInRange(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		function getRandomFloatInRange(min, max) {
+			return Math.random() * (max - min + 1) + min;
+		}
+		function findFi (bX, bY, x, y) {
+			let x1 = x;
+			let y1 = bY;
+			let a = Math.sqrt(Math.pow(x - x1, 2) + Math.pow(y - y1, 2));
+			let c = Math.sqrt(Math.pow(bX - x1, 2) + Math.pow(bY - y1, 2));
+			return Math.atan(a / c);
+		}
+		function checkAngle(angle) {
+			let fi = angle;
+			if (fi < 0)
+				fi = fi + 2 * Math.PI;
+			else if (fi >= 2 * Math.PI)
+				fi = fi - 2 * Math.PI;
+			return fi;
+		}
+		class TFigure {
+			constructor(pX, pY, dir) {
+				this.posX = pX; //позиция фигуры по X
+				this.posY = pY; //позиция фигуры по Y
+				this.typeOfFig = "none";
+				// направление движения (угол от оси X)
+				this.direction = dir;
+				//скорость фигуры
+				this.speed = 0;
+				// ускорение фигуры
+				this.accelleration = 0;
+				this.col = "rgb(200,200,200)";
+				this.gravityTrigger = false;
+				this.gMod = 1;
+				this.gSpeed = G;
+				this.damage = 0;
+				this.hp = 0;
+				this.img;
+			}
+			setImage(adress) {
+				var img = new Image();
+				img.src = adress;
+				this.img = img;
+			}
+			enableGravity (gM) {
+				this.gravityTrigger = true;
+				this.gMod = gM;
+			}
+			hit (damage) {
+				this.hp -= damage;
+				if (this.hp <= 0)
+					return true
+				else return false
+			}
+			changeCoordinates() {
+				this.posX = this.posX + this.speed * Math.cos(this.direction);
+				this.posY = this.posY - this.speed * Math.sin(this.direction);
+				this.speed = this.speed + this.accelleration;
+				/*if (this.gravityTrigger && this.direction < 3 * Math.PI / 2) {
+					this.direction =  this.direction + (this.direction + Math.PI / 2) / this.gMod;
+				}*/
+				
+				if (this.gravityTrigger) {
+					this.posY += this.gSpeed * this.gMod;
+					this.gSpeed += G;
+				}
+			}
+			draw(h, w) {
+				if (this.img != undefined){
+					ctx.drawImage(this.img, this.posX - w / 2, this.posY - h / 2, w, h);
+					return true;
+				}
+				else
+					return false;
+			}
+		}
+		class TBall extends TFigure {
+			constructor(pX, pY, dir, r) {
+				super(pX, pY, dir);
+				this.r = r;
+				this.typeOfFig = "ball";
+			}
+			draw (ctx) {
+				if (!super.draw(this.r * 2, this.r * 2)) {
+					ctx.fillStyle = this.col;
+					ctx.strokeStyle = "rgb(0,0,0)";
+					ctx.beginPath();
+					ctx.arc(this.posX, this.posY, this.r, 0, 2*Math.PI, false);
+					ctx.closePath();
+					ctx.fill();
+				}
+				
+			}
+			
+		}
+		class TRec extends TFigure {
+			constructor(pX, pY, dir, height, width) {
+				super(pX, pY, dir);
+				this.h = height;
+				this.w = width;
+				this.typeOfFig = "rectangle";
+				
+				this.a = Math.sqrt(Math.pow(pX - (pX + this.w / 2), 2) + Math.pow(pY - (pY + this.h / 2), 2));
+				this.fi = findFi(pX, pY, pX + this.w / 2, pY + this.h / 2);
+				this.x1 = pX + this.a * Math.cos(this.direction + this.fi);
+				this.y1 = pY - this.a * Math.sin(this.direction + this.fi);
+				this.x2 = pX + this.a * Math.cos(this.direction - this.fi);
+				this.y2 = pY - this.a * Math.sin(this.direction - this.fi);
+				this.x3 = pX + this.a * Math.cos(this.direction + this.fi + Math.PI);
+				this.y3 = pY - this.a * Math.sin(this.direction + this.fi + Math.PI);
+				this.x4 = pX + this.a * Math.cos(this.direction - this.fi + Math.PI);
+				this.y4 = pY - this.a * Math.sin(this.direction - this.fi + Math.PI);
+			}
+			changeCoordinates() {
+				super.changeCoordinates();
+				this.x1 = this.posX + this.a * Math.cos(this.direction + this.fi);
+				this.y1 = this.posY - this.a * Math.sin(this.direction + this.fi);
+				this.x2 = this.posX + this.a * Math.cos(this.direction - this.fi);
+				this.y2 = this.posY - this.a * Math.sin(this.direction - this.fi);
+				this.x3 = this.posX + this.a * Math.cos(this.direction + this.fi + Math.PI);
+				this.y3 = this.posY - this.a * Math.sin(this.direction + this.fi + Math.PI);
+				this.x4 = this.posX + this.a * Math.cos(this.direction - this.fi + Math.PI);
+				this.y4 = this.posY - this.a * Math.sin(this.direction - this.fi + Math.PI);
+			}
+			draw(ctx){
+				if (!super.draw(this.w, this.h)) {
+					ctx.fillStyle = this.col;
+					ctx.strokeStyle = "rgb(0,0,0)";
+					ctx.beginPath();
+					ctx.moveTo(this.x1, this.y1);
+					ctx.lineTo(this.x2, this.y2);
+					ctx.lineTo(this.x3, this.y3);
+					ctx.lineTo(this.x4, this.y4);
+					ctx.lineTo(this.x1, this.y1);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+		class TTri extends TFigure {
+			constructor(pX, pY, dir, r) {
+				super(pX, pY, dir);
+				this.r = r;
+				this.fi = dir;
+				this.rotSpeed = Math.PI / 12;
+				this.typeOfFig = "triangle";
+				this.col = "rgb(0,200,0)";
+				this.x1 = pX + this.r * Math.cos(this.fi);
+				this.y1 = pY - this.r * Math.sin(this.fi);
+				this.x2 = pX + this.r * Math.cos(this.fi + (2 * Math.PI / 3));
+				this.y2 = pY - this.r * Math.sin(this.fi + (2 * Math.PI / 3));
+				this.x3 = pX + this.r * Math.cos(this.fi + (4 * Math.PI / 3));
+				this.y3 = pY - this.r * Math.sin(this.fi + (4 * Math.PI / 3));
+			}
+			changeCoordinates() {
+				super.changeCoordinates();
+				this.fi = this.fi + this.rotSpeed;
+				this.x1 = this.posX + this.r * Math.cos(this.fi);
+				this.y1 = this.posY - this.r * Math.sin(this.fi);
+				this.x2 = this.posX + this.r * Math.cos(this.fi + (2 * Math.PI / 3));
+				this.y2 = this.posY - this.r * Math.sin(this.fi + (2 * Math.PI / 3));
+				this.x3 = this.posX + this.r * Math.cos(this.fi + (4 * Math.PI / 3));
+				this.y3 = this.posY - this.r * Math.sin(this.fi + (4 * Math.PI / 3));
+			}
+			draw() {
+				ctx.fillStyle = this.col;
+				ctx.strokeStyle = "rgb(0,0,0)";
+				ctx.beginPath();
+				ctx.moveTo(this.x1, this.y1);
+				ctx.lineTo(this.x2, this.y2);
+				ctx.lineTo(this.x3, this.y3);
+				ctx.lineTo(this.x1, this.y1);
+				ctx.fill();
+				ctx.closePath();
+			}
+		}
+		class TGun {
+			constructor(pbX, pbY, r, fi) {
+				this.baseX = pbX;
+				this.baseY = pbY;
+				this.fi = fi;
+				this.r = r;
+				this.gunX = this.baseX + this.r * Math.cos(this.fi);
+				this.gunY = this.baseY - this.r * Math.sin(this.fi);
+				this.weapon = "bullet";
+			}
+			updateCoordinates(event) {
+				if (gameInProgress) {
+					let x = event.clientX;
+					let y = event.clientY;
+					this.fi = findFi(this.baseX, this.baseY, x, y);
+					this.gunX = this.baseX + this.r * Math.cos(this.fi);
+					this.gunY = this.baseY - this.r * Math.sin(this.fi);
+				}
+				
+			}
+			draw(ctx) {
+				ctx.beginPath();
+				ctx.moveTo(this.baseX, this.baseY);
+				ctx.lineTo(this.gunX, this.gunY);
+				ctx.stroke();
+			}
+			shoot() {
+				if (cooldown <= 0){
+					if (this.weapon == "bullet") {
+						// ядра
+						var bullet = new TBall(this.gunX, this.gunY, this.fi, 30)
+						bullet.enableGravity(0.08);
+						bullet.speed = 8;
+						bullet.damage = 2;
+						cooldown = 50 / (cooldownReduction / 2);
+					}
+					else if (this.weapon == "rocket") {
+						// пво рокеты
+						var bullet = new TRec(this.gunX, this.gunY, this.fi, 20, 45)
+						bullet.speed = 10;
+						bullet.damage = 1;
+						cooldown = 60 / (cooldownReduction / 2);
+					}
+					else if (this.weapon == "shuriken") {
+						// сюрикены
+						var bullet = new TTri(this.gunX, this.gunY, this.fi, 30)
+						bullet.speed = 6;
+						bullet.enableGravity(0.05);
+						bullet.damage = 0.5;
+						bullet.draw(ctx);
+						bullets.push(bullet);
+						bullet = new TTri(this.gunX, this.gunY, this.fi + Math.PI / 12, 30);
+						bullet.speed = 6;
+						bullet.enableGravity(0.05);
+						bullet.damage = 0.5;
+						bullet.draw(ctx);
+						bullets.push(bullet);
+						bullet = new TTri(this.gunX, this.gunY, this.fi - Math.PI / 12, 30);
+						bullet.speed = 6;
+						bullet.enableGravity(0.05);
+						bullet.damage = 0.5;
+						cooldown = 90 / (cooldownReduction / 2);
+					}
+					bullet.draw(ctx);
+					bullets.push(bullet);
+				}
+			}
+			changeWeapon() {
+				if (this.weapon == "bullet")
+					this.weapon = "rocket";
+				else
+				if (this.weapon == "rocket")
+					this.weapon = "shuriken";
+				else
+				if (this.weapon == "shuriken")
+					this.weapon = "bullet";
+			}
+		}
+		function f_clPoint_point_line(pX, pY, x0, y0, x1, y1) {
+			let answer = (y0 - y1) * pX + (x1 - x0) * pY;
+			answer += (x0 * y1 - x1 * y0);
+			answer = answer / (Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2))); 
+			return answer;
+		}
+		// функция для пересечения линий
+		function area (x1, y1, x2, y2, x3, y3) {
+			return (x2 - x1) * (y2 - y1) - (y2 - y1) * (x3 - x1);
+		}
+ 		
+ 		// функция для пересечения линий
+		function intersect_1 (a, b, c, d) {
+			if (a > b) {
+				let temp = a;
+				a = b;
+				b = temp;
+			}  //swap (a, b);
+			if (c > d) {
+				let temp = c;
+				c = d;
+				d = temp;
+			}  //swap (c, d);
+			return Math.max(a,c) <= Math.min(b,d);
+		}
+ 
+ 		function checkColl_line_line (x1, y1, x2, y2, x3, y3, x4, y4) {
+			return intersect_1 (x1, x2, x3, x4)
+				&& intersect_1 (y1, y2, y3, y4)
+				&& Math.round(area(x1, y1, x2, y2, x3, y3)) * Math.round(area(x1, y1, x2, y2 , x4, y4)) <= 0
+				&& area(x3, y3, x4, y4, x1, y1) * area(x3, y3, x4, y4, x2, y2) <= 0;
+		}
+		function checkColl_ball_ball (ball1, ball2) {
+			if (Math.sqrt(Math.pow(ball1.posX - ball2.posX, 2) + Math.pow(ball1.posY - ball2.posY, 2)) <= (ball1.r + ball2.r)){
+				return true;
+			}
+			else {
+				return false;
+			} 
+		}
+		function checkColl_ball_rect (ball, rect) {
+			// нахождение расстояния от центра шара до сторон прямоугольника
+			let a1 = f_clPoint_point_line(ball.posX, ball.posY, rect.x1, rect.y1, rect.x2, rect.y2);
+			let a2 = f_clPoint_point_line(ball.posX, ball.posY,  rect.x2, rect.y2, rect.x3, rect.y3);
+			let a3 = f_clPoint_point_line(ball.posX, ball.posY,  rect.x3, rect.y3, rect.x4, rect.y4);
+			let a4 = f_clPoint_point_line(ball.posX, ball.posY,  rect.x4, rect.y4, rect.x1, rect.y1);
+			// нахождение минимального расстояния и проверка на пересечение
+			let min = Math.min(a1, a2, a3, a4);
+			if (Math.abs(min) <= ball.r) {
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_ball_tri (ball, tri) {
+			let a1 = f_clPoint_point_line(ball.posX, ball.posY, tri.x1, tri.y1, tri.x2, tri.y2);
+			let a2 = f_clPoint_point_line(ball.posX, ball.posY,  tri.x2, tri.y2, tri.x3, tri.y3);
+			let a3 = f_clPoint_point_line(ball.posX, ball.posY,  tri.x3, tri.y3, tri.x1, tri.y1);
+			let min = Math.min(a1, a2, a3);
+			if (Math.abs(min) <= ball.r) {
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_rect_line (rect, x1, y1, x2, y2) {
+			if (checkColl_line_line(rect.x1, rect.y1, rect.x2, rect.y2, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x2, rect.y2, rect.x3, rect.y3, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x3, rect.y3, rect.x4, rect.y4, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x4, rect.y4, rect.x1, rect.y1, x1, y1, x2, y2)){
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_rect_tri (rect, tri) {
+			if (checkColl_rect_line(rect, tri.x1, tri.y1, tri.x2, tri.y2)){
+				return true;
+			}
+			else if (checkColl_rect_line(rect, tri.x2, tri.y2, tri.x3, tri.y3)){
+				return true;
+			}
+			else if (checkColl_rect_line(rect, tri.x3, tri.y3, tri.x1, tri.y1)){
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_tri_line (tri, x1, y1, x2, y2) {
+			if (checkColl_line_line(tri.x1, tri.y1, tri.x2, tri.y2, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(tri.x2, tri.y2, tri.x3, tri.y3, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(tri.x3, tri.y3, tri.x1, tri.y1, x1, y1, x2, y2)){
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_tri_tri (tri1, tri2) {
+			if (checkColl_tri_line(tri1, tri2.x1, tri2.y1, tri2.x2, tri2.y2)){
+				return true;
+			}
+			else if (checkColl_tri_line(tri1, tri2.x2, tri2.y2, tri2.x3, tri2.y3)){
+				return true;
+			}
+			else if (checkColl_tri_line(tri1, tri2.x3, tri2.y3, tri2.x1, tri2.y1)){
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_rect_line (rect, x1, y1, x2, y2) {
+			if (checkColl_line_line(rect.x1, rect.y1, rect.x2, rect.y2, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x2, rect.y2, rect.x3, rect.y3, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x3, rect.y3, rect.x4, rect.y4, x1, y1, x2, y2)){
+				return true;
+			}
+			else if (checkColl_line_line(rect.x4, rect.y4, rect.x1, rect.y1, x1, y1, x2, y2)){
+				return true;
+			}
+			else return false;
+		}
+		function checkColl_rect_rect (rect1, rect2) {
+			if (checkColl_rect_line(rect1, rect2.x1, rect2.y1, rect2.x2, rect2.y2)){
+				return true;
+			}
+			else if (checkColl_rect_line(rect1, rect2.x2, rect2.y2, rect2.x3, rect2.y3)){
+				return true;
+			}
+			else if (checkColl_rect_line(rect1, rect2.x3, rect2.y3, rect2.x4, rect2.y4)){
+				return true;
+			}
+			else if (checkColl_rect_line(rect1, rect2.x4, rect2.y4, rect2.x1, rect2.y1)){
+				return true;
+			}
+			else return false;
+		}
+		function check_collusion(item1, item2) {
+			let check;
+			if (item1.typeOfFig == "ball") {
+				if (item2.typeOfFig == "ball") {
+					check = checkColl_ball_ball(item1, item2);
+				}
+				if (item2.typeOfFig == "rectangle") {
+					check = checkColl_ball_rect(item1, item2);
+				}
+				if (item2.typeOfFig == "triangle") {
+					check = checkColl_ball_tri(item1, item2);
+				}
+			}
+			if (item1.typeOfFig == "rectangle") {
+				if (item2.typeOfFig == "ball") {
+					check = checkColl_ball_rect(item2, item1);
+				}
+				if (item2.typeOfFig == "rectangle") {
+					check = checkColl_rect_rect(item1, item2);
+				}
+				if (item2.typeOfFig == "triangle") {
+					check = checkColl_rect_tri(item1, item2);
+				}
+			}
+			if (item1.typeOfFig == "triangle") {
+				if (item2.typeOfFig == "ball") {
+					check = checkColl_ball_tri(item2, item1);
+				}
+				if (item2.typeOfFig == "rectangle") {
+					check = checkColl_rect_tri(item2, item1);
+				}
+				if (item2.typeOfFig == "triangle") {
+					check = checkColl_tri_tri(item1, item2);
+				}
+			}
+			return check;
+		}
+		function drawBack(ctx,col1,col2,w,h){
+			// закрашиваем канвас градиентным фоном
+			ctx.save();
+			var g = ctx.createLinearGradient(0,0,0,h);
+			g.addColorStop(1,col1);
+			g.addColorStop(0,col2);
+			ctx.fillStyle = g;
+			ctx.fillRect(0,0,w,h);
+			ctx.restore();
+		}
+		//база и пушка
+		var base, baseGun;
+		//скорость спавна врагов
+		var enemySpawnTimeAir, enemySpawnTimeLand;
+		//время до спавна врагов
+		var enemySpawnTimeAirDelay, enemySpawnTimeLandDelay;
+		function init(){
+			canvas = document.getElementById('canvas');
+			if (canvas.getContext){
+				
+				ctx = canvas.getContext('2d');
+				//рисуем фон
+				drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
+				//рисуем базу и пушку
+				base = new TBall(0, canvas.height, 0, 60);
+				baseGun = new TGun(base.posX, base.posY, base.r * 1.5, Math.PI / 4);
+				baseGun.draw(ctx);
+				base.draw(ctx);
+				gameInProgress = false;
+				ctx.fillStyle = "rgb(0, 0, 255)";
+    			//ctx.strokeStyle = "#F00";
+    			ctx.font = "italic 30pt Arial";
+				ctx.fillText("Press LMB to start", canvas.width / 3, canvas.height * 9 / 10);
+				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.fillRect(canvas.width / 3, canvas.height / 4, canvas.width / 3, canvas.height / 3);
+				ctx.clearRect(canvas.width / 3 + 1, canvas.height / 4 + 1, canvas.width / 3 - 2, canvas.height / 3 - 2);
+				ctx.textBaseline = "top";
+				ctx.font = "15pt Arial";
+				for (let i = 0; i < players.length; i++) {
+					ctx.fillText(players[i][0], canvas.width / 3 + 1, canvas.height / 4 + 1 + canvas.height / 16 * i);
+					ctx.fillText(players[i][1], canvas.width / 3 + 1 + canvas.width / 4, canvas.height / 4 + 1 + canvas.height / 16 * i);
+				}
+				bullets = [];
+				enemySpawnTimeAir = 500;
+				enemySpawnTimeAirDelay = 0;
+				enemySpawnTimeLand = 300;
+				enemySpawnTimeLandDelay = 0;
+				bigEnemyDelay = 1500;
+				bigEnemySpawnTime = 1500;
+				enemies = [];
+				score = 0;
+				diffScoreMod = 1;
+				diffMod = 1.05;
+				lives = 3;
+				cooldown = 0;
+				enemyCounter = 0;
+				cooldownReduction = 2;
+			}
+		}
+		function spawnAirEnemy() {
+			let enemy = new TBall(canvas.width - 5, getRandomFloatInRange(30, canvas.height / 2), Math.PI, getRandomInRange(25,40) / (diffMod / 5));
+			enemy.speed = getRandomFloatInRange(0.1, 0.5) * diffMod / 5;
+			enemy.col = "rgb(255, 0, 0)";
+			enemy.img = airEnemyImg;
+			return enemy;
+		}
+		function spawnLandEnemy() {
+			let h = getRandomInRange(30,50) / (diffMod / 5);
+			let enemy = new TRec(canvas.width - 5, canvas.height - h / 2 - 1, Math.PI, h, getRandomInRange(30,50) / (diffMod / 5));
+			enemy.speed = getRandomFloatInRange(0.1, 0.5) * diffMod / 5;
+			enemy.col = "rgb(255, 0, 0)";
+			enemy.img = landEnemyImg;
+			return enemy;
+		}
+		function spawnBigEnemy() {
+			let r = getRandomInRange(0, 1);
+			let enemy;
+			if (r == 0) {
+				enemy = new TBall(canvas.width - 5, getRandomFloatInRange(30, canvas.height / 2), Math.PI, getRandomInRange(25,40) * 1.5 / (diffMod / 5));
+				enemy.speed = getRandomFloatInRange(0.1, 0.5) * diffMod / 5;
+				enemy.col = "rgb(150, 0, 150)";
+			}
+			else {
+				let h = getRandomInRange(30,50) / (diffMod / 5);
+				enemy = new TRec(canvas.width - 5, canvas.height - h / 2 - 1, Math.PI, h, getRandomInRange(30,50) / (diffMod / 5));
+				enemy.speed = getRandomFloatInRange(0.1, 0.5) * diffMod / 5;
+				enemy.col = "rgb(250, 0, 250)";
+			}
+			enemy.hp = diffMod;
+			return enemy;
+		}
+		function gameOwer() {
+			clearInterval(idUpdate);
+			let i = 0;
+			gameInProgress = false;
+			while (i < 6 && players[i][1] >= score) {
+				i++;
+			}
+			if (i < 6) {
+				players[i][0] = gamerName;
+				players[i][1] = parseInt(score);
+			}
+			init();
+		}
+		function update() {
+			
+			drawBack(ctx,'#202020','#aaa',canvas.width,canvas.height);
+			baseGun.draw(ctx);
+			base.draw(ctx);
+			if (lives == 0)
+				gameOwer();
+			else {
+				enemySpawnTimeAirDelay++;
+				enemySpawnTimeLandDelay++;
+				if (enemySpawnTimeAirDelay >= enemySpawnTimeAir / (diffMod / 10 + 1)) {
+					enemies.push(spawnAirEnemy());
+					enemySpawnTimeAirDelay = 0;
+				}
+				if (enemySpawnTimeLandDelay >= enemySpawnTimeLand  / (diffMod / 10 + 1)) {
+					enemies.push(spawnLandEnemy());
+					enemySpawnTimeLandDelay= 0;
+				}
+				if (diffMod > 3) {
+					bigEnemyDelay++;
+					if (bigEnemyDelay >= bigEnemySpawnTime / (diffMod / 9 + 1)) {
+						enemies.push(spawnBigEnemy());
+					}
+					bigEnemyDelay = 0;
+				}
+				for (let i = 0; i < enemies.length; i) {
+					enemies[i].changeCoordinates();
+					if (enemies[i].posX < 0){
+						enemies.splice(i,1);
+						lives--;
+					}
+					else {
+						enemies[i].draw(ctx);
+						i++;
+					}
+				}
+				for (let i = 0; i < bullets.length; i) {
+					let check = true
+					for (let j = 0; j < enemies.length; j++) {
+						if (check_collusion(bullets[i], enemies[j])) {
+							if (enemies[j].hit(bullets[i].damage)) {
+								enemies.splice(j, 1);
+								enemyCounter++;
+								score = score + parseInt(diffScoreMod);
+								diffScoreMod = enemyCounter / 10 + 1;
+								diffMod = diffScoreMod;
+							}
+							check = false;
+							bullets.splice(i, 1);
+							break;
+						}
+					}
+					if (check){
+						bullets[i].changeCoordinates();
+						if ((bullets[i].posX > canvas.width) || (bullets[i].posX < 0) || 
+							(bullets[i].posY > canvas.height) ||(bullets[i].posY < 0)) 
+							bullets.splice(i,1);
+						else{
+							for (let j = 0; j < enemies.length; j++) {
+								if (check_collusion(bullets[i], enemies[j])) {
+									if (enemies[j].hit(bullets[i].damage)) {
+										enemies.splice(j, 1);
+										enemyCounter++;
+										score = score + diffScoreMod;
+										diffScoreMod = enemyCounter / 10 + 1;
+										diffMod = diffScoreMod;
+									}
+									check = false;
+									bullets.splice(i, 1);
+									break;
+								}
+							}
+						}
+							}
+							if (check)
+								i++;
+					}
+				}
+				cooldownReduction = 2 + parseInt(enemyCounter / 10);
+				for (let i = 0; i < bullets.length; i++) {
+					bullets[i].draw(ctx);
+				}
+				ctx.font = "15pt Arial";
+				ctx.fillStyle = "rgb(50, 50, 250)";
+				ctx.fillText("Score: " + parseInt(score), canvas.width / 20, canvas.height  / 20);
+				ctx.fillStyle = "rgb(250, 50, 50)";
+				ctx.fillText("Lives: " + lives, canvas.width / 20, canvas.height * 2 / 20);
+				ctx.fillStyle = "rgb(50, 250, 50)";
+				ctx.fillText("Cooldown: " + (cooldown / 40).toPrecision(3), canvas.width * 3 / 20, canvas.height / 20);
+				ctx.fillStyle = "rgb(0, 250, 250)";
+				ctx.fillText("Weapon Level: " + cooldownReduction / 2, canvas.width * 3 / 20, canvas.height * 2 / 20);
+				ctx.fillStyle = "rgb(0, 150, 150)";
+				ctx.fillText("Weapon: " + baseGun.weapon, canvas.width * 3 / 20, canvas.height * 3 / 20);
+				ctx.fillStyle = "rgb(250, 250, 250)";
+				ctx.fillText("Level: " + parseInt(diffMod), canvas.width / 20, canvas.height * 3 / 20);
+				if (cooldown > 0){
+					cooldown--;
+					if (cooldown < 0)
+						cooldown = 0;
+				}
+			}
+		function LMB(){
+			if (!gameInProgress) {
+				gameInProgress = true;
+				idUpdate = setInterval("update();", 10);
+			}
+			else{
+				baseGun.shoot();
+			}
+		}
+		function RMB(){
+			if (gameInProgress){
+				baseGun.changeWeapon();
+			}
+		}
+		function load() {
+			gamerName = prompt("Введите имя игрока", "Gamer");
+			init();
+		}
+		function pause() {
+			if (gameInProgress) {
+				gameInProgress = false;
+				clearInterval(idUpdate);
+			}
+			else {
+				idUpdate = setInterval("update();", 10);
+				gameInProgress = true;
+			}
+		}
+		function changeGamerName() {
+			if (gameInProgress) {
+				pause();
+				gamerName = prompt("Введите имя игрока", "Gamer");
+				pause();
+			}
+			else {
+				gamerName = prompt("Введите имя игрока", "Gamer");
+			}
+		}
+	</script>
+	<style type="text/css">
+		canvas { border: 1px solid blue; }
+	</style>
+</head>
+<body onload="load();">
+	<canvas id="canvas" width="1000" height="500" onclick="LMB();" onmousemove="baseGun.updateCoordinates(event);" oncontextmenu="RMB();return false">
+	</canvas>
+	<form>
+		<input type = "button" value = "Сменить имя пользователя" onclick="changeGamerName()">
+		<input type = "button" value = "Пауза" onclick="pause()">
+	</form>
+</body>
+</html>
